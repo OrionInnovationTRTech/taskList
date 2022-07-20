@@ -18,16 +18,18 @@ struct ContentView: View {
     var body: some View {
         List{
             ForEach(tasks){ task in
-                VStack(alignment: .leading){
-                    Text(task.title ?? "")
-                        .font(.headline)
-                    HStack{
-                        Text(task.creationDate! ,style: .date)
-                        Text(task.detail?.prefix(10) ?? "")
-                            + Text("...")
+                NavigationLink(destination: TaskDetailView(task:task,newTaskTitle: $title,newTaskDetail: $detail)){
+                    VStack(alignment: .leading){
+                        Text(task.title ?? "")
+                            .font(.headline)
+                        HStack{
+                            Text(task.creationDate! ,style: .date)
+                            Text(task.detail?.prefix(10) ?? "")
+                                + Text("...")
+                        }
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
                     }
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
                 }
             }
             .onDelete(perform: deleteTask)
@@ -35,6 +37,8 @@ struct ContentView: View {
         .navigationTitle("Tasks")
         .toolbar{
             Button {
+                title = ""
+                detail = ""
                 isAddingNewTask = true
             } label: {
                 Image(systemName: "plus")

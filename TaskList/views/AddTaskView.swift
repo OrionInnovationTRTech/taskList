@@ -15,7 +15,7 @@ struct addTaskView: View {
     var body: some View {
         Form{
             Section(header:Text("Title")){
-                TextField("Enter your task", text:$title)
+                TextField("Enter Task", text:$title)
             }
             Section(header: Text("Details")){
                 TextEditor(text:$detail)
