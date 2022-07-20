@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct TaskListApp: App {
+    @StateObject private var dataController = DataController()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationView{
+                ContentView()
+            }
+            .environment(\.managedObjectContext, dataController.container.viewContext)
         }
     }
 }
