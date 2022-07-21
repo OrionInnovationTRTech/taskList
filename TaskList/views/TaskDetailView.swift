@@ -10,8 +10,9 @@ import SwiftUI
 struct TaskDetailView: View {
     @Environment(\.managedObjectContext) var moc
     @ObservedObject var task:Tasks
-    @Binding var newTaskTitle: String
-    @Binding var newTaskDetail: String
+//    @Binding var newTaskTitle: String
+//    @Binding var newTaskDetail: String
+    @ObservedObject private var td = TaskModel()
     @State var isEditing = false
     
     var body: some View {
@@ -24,23 +25,21 @@ struct TaskDetailView: View {
                     Text(task.detail ?? "")
                 }
             }
-//            Text("Creation date: ")
-//                + Text(task.creationDate! ,style: .date)
         }
-        .navigationTitle("lsjdf")
+        .navigationTitle(Text(task.creationDate ?? Date.now,style: .date))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
             ToolbarItem(placement: .confirmationAction) {
                 Button("Edit") {
                     isEditing = true
-                    newTaskTitle = task.title ?? ""
-                    newTaskDetail = task.detail ?? ""
+                    td.title = task.title ?? ""
+                    td.detail = task.detail ?? ""
                 }
             }
         }
         .sheet(isPresented: $isEditing){
             NavigationView{
-                addTaskView(title: $newTaskTitle, detail: $newTaskDetail)
+                addTaskView(title: $td.title, detail: $td.detail)
                     .navigationTitle("Edit Task")
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
@@ -50,8 +49,8 @@ struct TaskDetailView: View {
                         }
                         ToolbarItem(placement: .confirmationAction) {
                             Button("Save") {
-                                task.title = newTaskTitle
-                                task.detail = newTaskDetail
+                                task.title = td.title
+                                task.detail = td.detail
                                 try? moc.save()
                                 isEditing = false
                             }

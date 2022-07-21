@@ -16,6 +16,7 @@ struct TaskListApp: App {
             NavigationView{
                 ContentView()
             }
+            .navigationViewStyle(StackNavigationViewStyle())
             .environment(\.managedObjectContext, dataController.container.viewContext)
         }
     }

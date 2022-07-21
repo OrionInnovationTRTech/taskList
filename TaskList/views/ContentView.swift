@@ -11,14 +11,15 @@ struct ContentView: View {
     
     @Environment(\.managedObjectContext) var moc
     @FetchRequest(sortDescriptors: []) var tasks: FetchedResults<Tasks>
-    @State private var isAddingNewTask = false
-    @State var title: String = ""
-    @State var detail: String = ""
+    @State private var isAddingNewTask: Bool = false
+//    @State var title: String = ""
+//    @State var detail: String = ""
+    @ObservedObject private var td = TaskModel()
     
     var body: some View {
         List{
             ForEach(tasks){ task in
-                NavigationLink(destination: TaskDetailView(task:task,newTaskTitle: $title,newTaskDetail: $detail)){
+                NavigationLink(destination: TaskDetailView(task:task)){
                     VStack(alignment: .leading){
                         Text(task.title ?? "")
                             .font(.headline)
@@ -37,35 +38,33 @@ struct ContentView: View {
         .navigationTitle("Tasks")
         .toolbar{
             Button {
-                title = ""
-                detail = ""
-                isAddingNewTask = true
+                td.clear()
+                isAddingNewTask.toggle()
             } label: {
                 Image(systemName: "plus")
             }
         }
         .sheet(isPresented: $isAddingNewTask){
             NavigationView{
-                addTaskView(title: $title, detail: $detail)
+                addTaskView(title: $td.title, detail: $td.detail)
                     .navigationTitle("Add New Task")
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Dismiss") {
-                                isAddingNewTask = false
-                                title = ""
-                                detail = ""
+                                isAddingNewTask.toggle()
+                                td.clear()
                             }
                         }
                         ToolbarItem(placement: .confirmationAction) {
                             Button("Add") {
                                 let task = Tasks(context: moc)
                                 task.id = UUID()
-                                task.title = title
-                                task.detail = detail
+                                task.title = td.title
+                                task.detail = td.detail
                                 task.creationDate = Date.now
-                                isAddingNewTask = false
+                                isAddingNewTask.toggle()
                                 try? moc.save()
-                            }
+                            }.disabled(td.isTitleValid() ? false : true)
                         }
                     }
             }
