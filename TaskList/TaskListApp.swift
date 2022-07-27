@@ -14,9 +14,9 @@ struct TaskListApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationView{
-                ContentView()
+                TaskListView()
             }
-            .navigationViewStyle(StackNavigationViewStyle())
+            .navigationViewStyle(.stack)
             .environment(\.managedObjectContext, dataController.container.viewContext)
         }
     }
