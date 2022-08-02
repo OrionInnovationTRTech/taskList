@@ -11,7 +11,7 @@ struct TaskDetailView: View {
     @Environment(\.managedObjectContext) var moc
     @Environment(\.dismiss) var dismiss
     @ObservedObject var task:Tasks
-    @State var taskModel = TaskModel()
+    @StateObject var taskModel = TaskModel()
     @State private var showDeleteAlert = false
     
     var body: some View {

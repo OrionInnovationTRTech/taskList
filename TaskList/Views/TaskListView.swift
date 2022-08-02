@@ -10,53 +10,55 @@ import SwiftUI
 struct TaskListView: View {
     
     @Environment(\.managedObjectContext) var moc
-    @FetchRequest(sortDescriptors: [SortDescriptor(\.creationDate,order: .reverse)]) var tasks: FetchedResults<Tasks>
     @State private var isAddingNewTask: Bool = false
+    @State private var filterSetting: Int = 0
     @StateObject private var taskModel = TaskModel()
     
     var body: some View {
-        List{
-            ForEach(tasks){ task in
-                NavigationLink(destination: TaskDetailView(task:task)){
-                    ListItemView(task: task)
-                }
-                .listRowBackground(Color(UIColor(named: task.backgroundColor!)!))
-            }
-            .onDelete(perform: deleteTask)
-        }
-        .navigationTitle("Tasks")
-        .toolbar{
-            ToolbarItem(placement: .navigationBarTrailing){
-                Button {
-                    taskModel.clear()
-                    isAddingNewTask = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-            }
-        }
-        .sheet(isPresented: $isAddingNewTask){
-            NavigationView{
-                addTaskView()
-                    .navigationTitle("Add New Task")
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Dismiss") {
-                                isAddingNewTask = false
-                                taskModel.clear()
-                            }
-                        }
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Add") {
-                                addTask()
-                                isAddingNewTask = false
-                            }
-                            .disabled(taskModel.isTitleValid() ? false : true)
-                        }
+        FilteredTaskListView(filterSetting)
+            .navigationTitle("Tasks")
+            .toolbar{
+                ToolbarItem(placement: .navigationBarTrailing){
+                    Button {
+                        taskModel.clear()
+                        isAddingNewTask = true
+                    } label: {
+                        Image(systemName: "plus")
                     }
+                }
+                ToolbarItem(placement: .navigationBarLeading){
+                    Menu(){
+                        Button("Newest"){filterSetting = 0}
+                        Button("Oldest"){filterSetting = 1}
+                        Button("Alphabetical"){filterSetting = 2}
+                        Button("Priority"){filterSetting = 3}
+                    } label: {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                    }
+                }
             }
-        }
-        .environmentObject(taskModel)
+            .sheet(isPresented: $isAddingNewTask){
+                NavigationView{
+                    addTaskView()
+                        .navigationTitle("Add New Task")
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Dismiss") {
+                                    isAddingNewTask = false
+                                    taskModel.clear()
+                                }
+                            }
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Add") {
+                                    addTask()
+                                    isAddingNewTask = false
+                                }
+                                .disabled(taskModel.isTitleValid() ? false : true)
+                            }
+                        }
+                }
+            }
+            .environmentObject(taskModel)
     }
     
     func addTask(){
@@ -65,16 +67,9 @@ struct TaskListView: View {
         task.title = taskModel.title
         task.detail = taskModel.detail
         task.creationDate = Date.now
-        task.backgroundColor = CustomColors.colorArray.randomElement()
-        isAddingNewTask = false
-        try? moc.save()
-    }
-    
-    func deleteTask(at offsets: IndexSet){
-        for offset in offsets{
-            let task = tasks[offset]
-            moc.delete(task)
-        }
+        task.backgroundColor = CustomColorEnum.allCases.randomElement()?.rawValue
+        task.priority = taskModel.priority.rawValue
+        task.priorityNumber = Int16(taskModel.priority.value)
         try? moc.save()
     }
 }

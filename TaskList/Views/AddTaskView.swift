@@ -19,6 +19,14 @@ struct addTaskView: View {
             Section(header: Text("Details")){
                 TextEditor(text:$taskModel.detail)
             }
+            Section(header: Text("Priority")){
+                Picker("Priority",selection: $taskModel.priority){
+                    Text("Low").tag(Priority.low)
+                    Text("Medium").tag(Priority.medium)
+                    Text("High").tag(Priority.high)
+                }
+                .pickerStyle(.segmented)
+            }
         }
     }
 }
