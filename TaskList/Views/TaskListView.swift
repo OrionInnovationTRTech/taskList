@@ -12,7 +12,6 @@ struct TaskListView: View {
     @Environment(\.managedObjectContext) var moc
     @State private var isAddingNewTask: Bool = false
     @State private var filterSetting: Int = 0
-    @StateObject private var taskModel = TaskModel()
     
     var body: some View {
         FilteredTaskListView(filterSetting)
@@ -20,8 +19,7 @@ struct TaskListView: View {
             .toolbar{
                 ToolbarItem(placement: .navigationBarTrailing){
                     Button {
-                        taskModel.clear()
-                        isAddingNewTask = true
+                        isAddingNewTask.toggle()
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -40,37 +38,8 @@ struct TaskListView: View {
             .sheet(isPresented: $isAddingNewTask){
                 NavigationView{
                     addTaskView()
-                        .navigationTitle("Add New Task")
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button("Dismiss") {
-                                    isAddingNewTask = false
-                                    taskModel.clear()
-                                }
-                            }
-                            ToolbarItem(placement: .confirmationAction) {
-                                Button("Add") {
-                                    addTask()
-                                    isAddingNewTask = false
-                                }
-                                .disabled(taskModel.isTitleValid() ? false : true)
-                            }
-                        }
                 }
             }
-            .environmentObject(taskModel)
-    }
-    
-    func addTask(){
-        let task = Tasks(context: moc)
-        task.id = UUID()
-        task.title = taskModel.title
-        task.detail = taskModel.detail
-        task.creationDate = Date.now
-        task.backgroundColor = CustomColorEnum.allCases.randomElement()?.rawValue
-        task.priority = taskModel.priority.rawValue
-        task.priorityNumber = Int16(taskModel.priority.value)
-        try? moc.save()
     }
 }
 

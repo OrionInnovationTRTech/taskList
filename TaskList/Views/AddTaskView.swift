@@ -9,7 +9,10 @@ import SwiftUI
 
 struct addTaskView: View {
     
-    @EnvironmentObject var taskModel: TaskModel
+    @Environment(\.managedObjectContext) var moc
+    @Environment(\.dismiss) var dismiss
+    @StateObject private var taskModel = TaskModel()
+    
     
     var body: some View {
         Form{
@@ -27,6 +30,33 @@ struct addTaskView: View {
                 }
                 .pickerStyle(.segmented)
             }
+            Section(header: Text("Color")){
+                Picker("Colors",selection: $taskModel.backgroundColor){
+                    ForEach(CustomColor.allCases){ color in
+                        HStack{
+                            Image(systemName: "circle.fill")
+                                .foregroundColor(Color(color.rawValue))
+                            Text(color.rawValue)
+                        }
+                        .tag(color)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Add New Task")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Dismiss") {
+                    dismiss()
+                }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Add") {
+                    taskModel.addTask(context: moc)
+                    dismiss()
+                }
+                .disabled(taskModel.title.isEmpty ? true : false)
+            }
         }
     }
 }
@@ -34,6 +64,5 @@ struct addTaskView: View {
 struct addTaskView_Previews: PreviewProvider {
     static var previews: some View {
         addTaskView()
-            .environmentObject(TaskModel())
     }
 }
