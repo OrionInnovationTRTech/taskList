@@ -11,7 +11,7 @@ struct TaskDetailView: View {
     @Environment(\.managedObjectContext) var moc
     @Environment(\.dismiss) var dismiss
     @ObservedObject var task:Tasks
-    @State var taskModel = TaskModel()
+    @StateObject private var taskModel = TaskModel()
     @State private var showDeleteAlert = false
     
     var body: some View {
@@ -25,7 +25,7 @@ struct TaskDetailView: View {
         .navigationTitle(Text(task.creationDate ?? Date.now,style: .date))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
-            ToolbarItem(placement: .confirmationAction) {
+            ToolbarItem(placement: .destructiveAction) {
                 Button() {
                     showDeleteAlert = true
                 } label: {
@@ -35,7 +35,7 @@ struct TaskDetailView: View {
             }
         }
         .alert("Delete Task",isPresented: $showDeleteAlert){
-            Button("Delete",role: .destructive,action: deleteTask)
+            Button("Delete",role: .destructive){taskModel.deleteTask(task: task, context: moc)}
             Button("Cancel",role: .cancel){ }
         } message : {
             Text("Are you sure?")
@@ -52,13 +52,8 @@ struct TaskDetailView: View {
             }
         }
     }
-    
-    func deleteTask(){
-        moc.delete(task)
-        dismiss()
-    }
 }
-//
+
 //struct TaskDetailView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        TaskDetailView()
